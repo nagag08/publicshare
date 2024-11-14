@@ -1,0 +1,144 @@
+gaUpgradeReady: true
+global:
+  database:
+    initDBCreation: false
+  # imageRegistry: releases-docker.jfrog.io
+  # jfrogUrl: '{{ include "jfrog-platform.jfrogUrl" . }}'
+  
+  #TODO: Update JoinKey and MasterKey
+  joinKey: EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+  masterKey: FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+  # TODO: Update URL
+  #jfrogUrlUI: "***"
+  #storageClass: csi-multiaz
+
+## using external postgresql for all products
+#initContainerImage: <your registry>/uni9/ubi-minimal:9.4.1227
+initContainers:
+  image:
+    registry: <your registry>
+    repository: releases-docker.jfrog.io/ubi9/ubi-minimal
+    tag: 9.4.1227
+postgresql:
+  enabled: true
+  image:
+    registry: <your registry>
+    repository: releases-docker.jfrog.io/bitnami/postgresql
+    tag: 15.6.0-debian-11-r16
+  postgresqlUsername: artifactory
+  postgresqlPassword: artifactory
+  postgresqlDatabase: artifactory
+  persistence:
+    enabled: true
+    size: 2Gi
+  # securityContext:
+  #   enabled: true
+  #   fsGroup: 1004490000
+  # containerSecurityContext:
+  #   enabled: true
+  #   runAsUser: 1004490000
+
+# Update this config for AWS - JFROG
+# rabbitmq:
+#   enabled: true
+#   replicaCount: 2
+
+
+artifactory:
+  nginx:
+    enabled: true
+    image:
+      registry: <your registry>
+      repository: releases-docker.jfrog.io/jfrog/nginx-artifactory-pro:7.98.8
+      tag: 7.98.8
+  name: artifactory
+  # joinKeySecretName: joinkey-secret
+  # masterKeySecretName: masterkey-secret
+  image:
+    registry: <your registry>
+    repository: releases-docker.jfrog.io/jfrog/artifactory-pro
+    tag: 7.98.8
+    pullPolicy: IfNotPresent
+  database:
+    maxOpenConnections: 200
+    maxAge: 30000
+  artifactory:
+    admin:
+      password: "password"
+    consoleLog: true
+  replicaCount: 1
+ # nginx:
+ #  enabled: true
+ # ingress:
+ #  enabled: false
+  #  # kubectl create secret tls tlssecret --cert=ca.crt --key=ca.rsa.key -n <namespace>
+  #  tls:
+  #    - secretName: tlssecret
+  #  defaultBackend:
+  #    enabled: true
+  #  routerPath: /
+  #  artifactoryPath: /artifactory/
+  #  className: alb
+  #  annotations:
+  #    alb.ingress.kubernetes.io/scheme: internet-facing
+  #    alb.ingress.kubernetes.io/target-type: ip
+  #    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+  #    alb.ingress.kubernetes.io/ssl-redirect: '443'
+  #    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
+  #    alb.ingress.kubernetes.io/load-balancer-name: some-art-eks-alb
+  #    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1:12345:certificate/9f9f-4d8b-9fba-1d0eb07f2900
+  #    external-dns.alpha.kubernetes.io/hostname: "*.artifactory-something.company.com"
+  unifiedUpgradeAllowed: true
+  waitForDatabase: false
+  persistence:
+    size: 10Gi 
+    # binarystoreXml: |
+    #   <!-- The custom XML snippet -->
+    #   <config version="2">
+    #     <chain>
+    #           <provider id="cache-fs" type="cache-fs">
+    #               <provider id="file-system" type="file-system"/>
+    #           </provider>
+    #     </chain>
+    #     # <provider id="s3-storage-v3" type="s3-storage-v3">
+    #     #     <endpoint>s3.amazonaws.com</endpoint>
+    #     #     <bucketName>bucketName</bucketName>
+    #     #     <path>pathPrefix</path>
+    #     #     <region>s3Region</region>
+    #     #     <identity>yourIdentity</identity>
+    #     #     <credential> D13user </credential>
+    #     #     <usePresigning>true</usePresigning>
+    #     #     <signatureExpirySeconds>600</signatureExpirySeconds>
+    #     #     <maxConnections>50</maxConnections>
+    #     #     <connectionTimeout>10000</connectionTimeout>
+    #     # </provider>
+    #     # <provider type="cache-fs" id="cache-fs">
+    #     #     <maxCacheSize>250000000000</maxCacheSize>
+    #     #     <cacheProviderDir>cache</cacheProviderDir>
+    #     # </provider>
+    #   </config>
+
+xray:
+  enabled: false
+  # postgresql:
+  #   enabled: false
+  # database:
+  #   url: 'postgres://something/xray?sslmode=require'
+  #   user: postgres
+  #   password: xxxx
+  # replicaCount: 2
+  # xray:
+  #   openMetrics:
+  #     enabled: true
+  common:
+    persistence:
+      size: 500Gi
+      
+distribution:
+  enabled: false
+insight:
+  enabled: false 
+pipelines:
+  enabled: false  
+pdnServer:
+  enabled: false
